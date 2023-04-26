@@ -1,8 +1,5 @@
-import { Component, For, createSignal, onMount } from 'solid-js';
-
-import logo from './logo.svg';
-import styles from './App.module.css';
-import { msgEvent, wsConnect, wsSendMessage } from './src/websocket';
+import { Component, For, createSignal, onCleanup, onMount } from 'solid-js';
+import { eventEnum, msgEvent, wsConnect, wsSendMessage } from './src/websocket';
 
 const App: Component = () => {
 
@@ -16,10 +13,12 @@ const App: Component = () => {
 
   onMount(async () => {
     await wsConnect();
-    msgEvent.on('msg', (event) => {
-      addMSg(event.data);
-    });
+    msgEvent.on('msg', addMSg);
   });
+
+  onCleanup(() => {
+    msgEvent.removeListener('msg', addMSg);
+  })
 
   const sendMsg = (e: KeyboardEvent & {
     currentTarget: HTMLInputElement;
@@ -29,7 +28,7 @@ const App: Component = () => {
       const msg = e.currentTarget.value;
       e.currentTarget.value = '';
       addMSg(msg);
-      wsSendMessage(msg);
+      wsSendMessage(eventEnum.MSG, msg);
     }
 
   }

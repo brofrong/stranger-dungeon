@@ -5,8 +5,12 @@ let ws: WebSocket;
 
 export const msgEvent = new EventEmitter();
 
-export function wsSendMessage(data: string) {
-  ws.send(data);
+export enum eventEnum {
+  MSG = "msg",
+}
+
+export function wsSendMessage(event: eventEnum, data: any) {
+  ws.send(JSON.stringify({ event, data }));
 }
 
 export async function wsConnect() {
@@ -23,7 +27,12 @@ export async function wsConnect() {
     };
 
     ws.onmessage = (ev) => {
-      msgEvent.emit("msg", ev.data);
+      try {
+        const parsedData = JSON.parse(ev.data);
+        msgEvent.emit(parsedData.event, parsedData.data);
+      } catch (e) {
+        console.error(`invalid data ${ev.data}`);
+      }
     };
   });
 }

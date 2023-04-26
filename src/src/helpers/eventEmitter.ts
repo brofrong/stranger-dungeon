@@ -25,6 +25,6 @@ export class EventEmitter {
   }
 
   emit(name: string, data: any) {
-    this.events[name].forEach((callback) => callback(data));
+    this.events[name]?.forEach((callback) => callback(data));
   }
 }
